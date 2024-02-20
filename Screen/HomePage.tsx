@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -8,15 +8,23 @@ import {
   Dimensions,
   StyleSheet,
   ScrollView,
+  TextInput,
 } from 'react-native';
-import GifImage from '@lowkey/react-native-gif';
+
+const mobileW = Dimensions.get('window').width;
+const mobileH = Dimensions.get('window').height;
 
 const HomePage = () => {
-  const mobileW = Dimensions.get('window').width;
-  const mobileH = Dimensions.get('window').height;
   const [catImage, setCatImage] = useState<any>(null);
   const [catImageSayingHello, setCatImageSayingHello] = useState<any>(null);
   const [CatGIF, setCatGIF] = useState<any>(null);
+  const [catSaying, setCatSaying] = useState<string>('Hello');
+  useEffect(() => {
+    fetchRandomCat();
+    fetchRandomCatSayingHello();
+    fetchRandomCatGIF();
+  }, []);
+
   const fetchRandomCat = async () => {
     try {
       const timestamp = new Date().getTime(); // Unique timestamp
@@ -36,7 +44,9 @@ const HomePage = () => {
     try {
       const timestamp = new Date().getTime(); // Unique timestamp
       const response = await fetch(
-        `https://cataas.com/cat/says/hello?timestamp=${timestamp}`,
+        `https://cataas.com/cat/says/${catSaying}?timestamp=${timestamp}?fontSize=70&fontColor=red`,
+        //https://cataas.com/cat/says/hello?fontSize=50&fontColor=white
+        // 'https://cataas.com/cat/says/${catSaying}?fontSize=50&fontColor=red',
       );
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -68,7 +78,7 @@ const HomePage = () => {
         <Text
           style={{
             marginTop: 20,
-            color: 'white',
+            color: '#001d4d',
             alignSelf: 'center',
             fontSize: 40,
             fontWeight: 'bold',
@@ -77,89 +87,82 @@ const HomePage = () => {
         </Text>
         <Image
           style={{
+            alignItems: 'center',
+            alignSelf: 'center',
             marginTop: 10,
-            width: 'auto',
+            width: 200,
             height: 200,
-            resizeMode: 'contain',
+            borderRadius: 100,
           }}
+          // resizeMode="contain"
           source={require('../Assets/Images/Kat.png')}
         />
 
-        <TouchableOpacity style={styles.button} onPress={fetchRandomCat}>
-          <Text style={styles.buttonText}>Find A Cat</Text>
-        </TouchableOpacity>
+        <View style={styles.catCard}>
+          <TouchableOpacity style={styles.button} onPress={fetchRandomCat}>
+            <Text style={styles.buttonText}>Random Catto</Text>
+          </TouchableOpacity>
 
-        {catImage && (
-          <Image
+          {catImage && (
+            <Image style={styles.imageCat} source={{uri: catImage}} />
+          )}
+        </View>
+
+        <View style={styles.catCard}>
+          <View
             style={{
-              width: mobileW - 20,
-              // width: 'auto',
-              height: 400,
-              //   margin: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
               alignSelf: 'center',
-              marginTop: 10,
-              borderRadius: 10,
-            }}
-            source={{uri: catImage}}
-          />
-        )}
+            }}>
+            <TouchableOpacity
+              style={styles.buttonWithTextInput}
+              onPress={fetchRandomCatSayingHello}>
+              <Text style={styles.buttonText}>Find A Cat Saying </Text>
+            </TouchableOpacity>
+            <TextInput
+              placeholder="Eg. Hello"
+              style={styles.textInput}
+              value={catSaying}
+              onChangeText={catSaying => {
+                //@ts-ignore
+                setCatSaying(catSaying);
+              }}></TextInput>
+          </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={fetchRandomCatSayingHello}>
-          <Text style={styles.buttonText}>Find A Cat Saying Hello</Text>
-        </TouchableOpacity>
+          {catImageSayingHello && (
+            <Image
+              style={styles.imageCat}
+              source={{uri: catImageSayingHello}}
+            />
+          )}
+        </View>
 
-        {catImageSayingHello && (
-          <Image
-            style={{
-              width: mobileW - 20,
-              // width: 'auto',
-              height: 400,
-              //   margin: 20,
-              alignSelf: 'center',
-              marginTop: 10,
-              borderRadius: 10,
-            }}
-            source={{uri: catImageSayingHello}}
-          />
-        )}
+        <View style={styles.catCard}>
+          <TouchableOpacity style={styles.button} onPress={fetchRandomCatGIF}>
+            <Text style={styles.buttonText}>Find A Cat GIF</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={fetchRandomCatGIF}>
-          <Text style={styles.buttonText}>Find A Cat GIF</Text>
-        </TouchableOpacity>
-
-        {CatGIF && (
-          // <Image
-          //   style={{
-          //     width: mobileW - 20,
-          //     // width: 'auto',
-          //     height: 400,
-          //     //   margin: 20,
-          //     alignSelf: 'center',
-          //     marginTop: 10,
-          //     marginBottom: 10,
-          //     borderRadius: 10,
-          //   }}
-          //   source={{uri: CatGIF}}
-          // />
-          <GifImage
-            source={{
-              uri: CatGIF,
-            }}
-            style={{
-              width: mobileW - 20,
-              // width: 'auto',
-              height: 400,
-              //   margin: 20,
-              alignSelf: 'center',
-              marginTop: 10,
-              marginBottom: 10,
-              borderRadius: 10,
-            }}
-            resizeMode={'cover'}
-          />
-        )}
+          {CatGIF && (
+            <Image style={styles.imageCat} source={{uri: CatGIF}} />
+            // <GifImage
+            //   source={{
+            //     uri: CatGIF,
+            //   }}
+            //   style={{
+            //     width: mobileW - 20,
+            //     // width: 'auto',
+            //     height: 400,
+            //     //   margin: 20,
+            //     alignSelf: 'center',
+            //     marginTop: 10,
+            //     marginBottom: 10,
+            //     borderRadius: 10,
+            //   }}
+            //   resizeMode={'cover'}
+            // />
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -170,22 +173,68 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#919191',
+    // backgroundColor: '#919191',
+    backgroundColor: '#c7dcff',
   },
   button: {
-    backgroundColor: '#7f7f7f',
+    backgroundColor: '#6da3fc',
     // width: 150,
-    width: 'auto',
+    width: '50%',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 10,
     alignSelf: 'center',
   },
+  buttonWithTextInput: {
+    backgroundColor: '#6da3fc',
+    // width: 150,
+    width: '50%',
+    height: 58,
+    // padding: 15,
+    paddingTop: 15,
+    paddingBottom: 15,
+    paddingLeft: 15,
+    alignItems: 'center',
+    marginTop: 10,
+    alignSelf: 'center',
+    // borderRadius: 10,
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10,
+  },
   buttonText: {
     color: '#ffffff',
     fontSize: 18,
     fontWeight: '500',
+  },
+  imageCat: {
+    // width: mobileW - 20,
+    width: '95%',
+    // width: 'auto',
+    height: 400,
+    //   margin: 20,
+    alignSelf: 'center',
+    margin: 10,
+    borderRadius: 10,
+    resizeMode: 'contain',
+  },
+  catCard: {
+    width: mobileW - 20,
+    margin: 10,
+    backgroundColor: '#a8c8ff',
+    borderRadius: 10,
+  },
+  textInput: {
+    backgroundColor: '#6da3fc',
+    width: 100,
+    // height: 50,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 10,
+    alignSelf: 'center',
+    // borderRadius: 10,
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10,
   },
 });
 
